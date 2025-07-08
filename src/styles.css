@@ -1,4 +1,28 @@
 @import "tailwindcss";
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@utilities {
+  .fade-in {
+    animation: fadeIn 0.5s ease-in-out both;
+  }
+}
+
+@layer base {
+  @font-face {
+    font-family: 'Montserrat';
+    src: url('/assets/fonts/Montserrat-Medium.ttf') format('truetype');
+  }
+}
+@theme {
+  --font-montserrat: "Montserrat", sans-serif;
+}
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, night;
 }
