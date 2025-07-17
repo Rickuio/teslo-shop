@@ -55,9 +55,9 @@ export class AuthService {
 
         return this.http.get<AuthResponse>(`${baseUrl}/auth/check-status`,{
             headers: {
-                Autorization: `Bearer ${token}`
+                Autorization: `Bearer ${token}`,
             },
-        }).pipe(
+            }).pipe(
             tap( (resp) => {
                 this.handleAuthSuccessDetail(resp);
             }),
