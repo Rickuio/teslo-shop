@@ -1,6 +1,7 @@
 
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { rxResource } from '@angular/core/rxjs-interop';
 import { AuthResponse } from '@auth/interfaces/auth-response.interface';
 import { User } from '@auth/interfaces/user.interface';
 import { catchError, map, Observable, of, tap } from 'rxjs';
@@ -18,13 +19,17 @@ export class AuthService {
 
     private http = inject(HttpClient);
 
+    checkStatusResource = rxResource({
+        loader: () => this.checkStatus()
+    });
+
     getStatus = computed<AuthStatus>( () => {
         if (this._authStatus() === 'checking') return 'checking';
         if (this._user()) {
             return 'auth';
         }
         return 'not-auth';
-    })
+    });
 
     getUser = computed<User|null>( () => this._user());
     getToken = computed(this._token);
@@ -34,25 +39,70 @@ export class AuthService {
             email: mail,
             password: pass
         }).pipe(
-            tap(resp => {
-                this._user.set(resp.user);
-                this._authStatus.set('auth');
-                this._token.set(resp.token);
-                localStorage.setItem('token', resp.token);
+            map((resp) => this.handleAuthSuccessObs(resp)),
+            catchError((err) => this.handleAuthErrorObs(err))
+        );
+    }
+
+    checkStatus():Observable<boolean> {
+        
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            this.logout();
+            return of(false);
+        }
+
+        return this.http.get<AuthResponse>(`${baseUrl}/auth/check-status`,{
+            headers: {
+                Autorization: `Bearer ${token}`
+            },
+        }).pipe(
+            tap( (resp) => {
+                this.handleAuthSuccessDetail(resp);
             }),
             map(() => true),
-            catchError((err) => {
-                this._user.set(null);
-                this._token.set(null);
-                this._authStatus.set('not-auth');
-                if (err.status == '401') {
-                    console.log('Credenciales incorrectas');
-                }else {
-                    console.error('Error desconocido');
-                }
+            catchError((err:any) => {
+                this.handleAuthErrorDetail(err);
                 return of(false);
             })
         );
+    }
+
+    logout() {
+        this._user.set(null);
+        this._token.set(null);
+        this._authStatus.set('not-auth');
+        localStorage.removeItem('token');
+    }
+
+    private handleAuthSuccessObs(resp: AuthResponse) {
+        this._user.set(resp.user);
+        this._token.set(resp.token);
+        this._authStatus.set('auth');
+        localStorage.setItem('token', resp.token);
+        return true;
+    }
+
+    private handleAuthErrorObs(error: any) {
+        this.logout();
+        return of(false);
+    }
+
+    private handleAuthSuccessDetail(resp: AuthResponse) {
+        this._user.set(resp.user);
+        this._token.set(resp.token);
+        this._authStatus.set('auth');
+        localStorage.setItem('token', resp.token);
+    }
+
+    private handleAuthErrorDetail(error: any) {
+        if (error.status == '401') {
+            console.log('Credenciales incorrectas');
+        }else {
+            console.error('Error desconocido Auth');
+        }
+        this.logout();
     }
 
 }
