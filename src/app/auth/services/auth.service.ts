@@ -13,9 +13,9 @@ const baseUrl = environment.baseUrl;
 @Injectable({providedIn: 'root'})
 export class AuthService {
 
-    private _authStatus = signal<AuthStatus>('checking');
     private _user = signal<User | null>(null);
     private _token = signal<string | null>(null);
+    private _authStatus = signal<AuthStatus>('checking');
 
     private http = inject(HttpClient);
 
@@ -55,7 +55,7 @@ export class AuthService {
 
         return this.http.get<AuthResponse>(`${baseUrl}/auth/check-status`,{
             headers: {
-                Autorization: `Bearer ${token}`,
+                Authorization: `Bearer ${token}`,
             },
             }).pipe(
             tap( (resp) => {
@@ -63,6 +63,7 @@ export class AuthService {
             }),
             map(() => true),
             catchError((err:any) => {
+                console.log('Error Authorization ---> ');
                 this.handleAuthErrorDetail(err);
                 return of(false);
             })
