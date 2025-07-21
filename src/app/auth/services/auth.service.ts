@@ -33,6 +33,7 @@ export class AuthService {
 
     getUser = computed<User|null>( () => this._user());
     getToken = computed(this._token);
+    isAdmin = computed( () => this._user()?.roles.includes('admin') ?? false);
 
     login (mail: string, pass: string): Observable<boolean> {
         return this.http.post<AuthResponse>(`${baseUrl}/auth/login`,{
@@ -56,13 +57,15 @@ export class AuthService {
     }
 
     checkStatus():Observable<boolean> {
-        
+
         const token = localStorage.getItem('token');
         
         if (!token) {
             this.logout();
             return of(false);
         }
+
+        // TODO: Implementar cache para is-admin.guard.ts
 
         return this.http.get<AuthResponse>(`${baseUrl}/auth/check-status`,{
             // headers: {
