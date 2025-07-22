@@ -1,1 +1,11 @@
-<p>product-admin-page works!</p>,
+@if (productResource.isLoading()) {
+    <div class="flex justify-center items-center h-screen">
+        <span class="loading loading-spinner loading-lg"></span>
+    </div>
+}
+
+@if (productResource.hasValue()) {
+    <h1 class="text-2xl">{{ productResource.value().title }}</h1>
+    <div class="divider"></div>
+    <h1 class="text-1xl">{{ productId() }}</h1>
+}
