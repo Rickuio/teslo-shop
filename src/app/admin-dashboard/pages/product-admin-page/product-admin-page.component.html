@@ -5,7 +5,10 @@
 }
 
 @if (productResource.hasValue()) {
-    <h1 class="text-2xl">{{ productResource.value().title }}</h1>
+    <product-details [product]="productResource.value()" />
     <div class="divider"></div>
-    <h1 class="text-1xl">{{ productId() }}</h1>
+    <div>
+        <span class="text-2xl">{{ productResource.value().title }} : </span>
+        <span class="text-1xl ml-2">{{ productId() }}</span>
+    </div>
 }
