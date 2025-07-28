@@ -1,9 +1,11 @@
 <div class="card bg-base-100 shadow-sm fade-in">
   <figure class="px-10 pt-10">
-    <img
+    <a class="link link-accent" [routerLink]="['/product', product().slug]">
+      <img
       [src]="product().images | productImage"
       [alt]="product().title"
       class="rounded-xl" />
+    </a>
   </figure>
   <div class="card-body items-center text-center">
     <h2 class="card-title font-montserrat link-accent text-lg hover:underline cursor-pointer" 

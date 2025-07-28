@@ -22,6 +22,10 @@
     </ul>
   </div>
   <div class="navbar-end gap-4">
+    <!-- @if ( authService.getUser()?.roles?.includes('admin') ) { -->
+    @if ( authService.isAdmin()) {
+      <a routerLink="/admin" class="btn text-secondary">Admin Panel</a>
+    }
     @if (authService.getStatus() === 'auth') {
       <button class="btn btn-ghost">
         {{ authService.getUser()?.fullName }}
