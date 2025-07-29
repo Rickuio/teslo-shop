@@ -43,7 +43,5 @@ export class LoginPageComponent {
       }, 2000);
     });
   }
-
-  //Todo: Check Authentication - Register - Logout
-
+  
 }
