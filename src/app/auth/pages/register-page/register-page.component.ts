@@ -20,7 +20,7 @@ export class RegisterPageComponent {
   registerForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(4)]],
-    fullName: ['', [Validators.required, Validators.minLength(4)]],
+    fullName: ['', [Validators.required, Validators.minLength(6)]],
   });
 
   onSubmit() {
@@ -32,8 +32,9 @@ export class RegisterPageComponent {
       return;
     }
     const { email='', password='', fullName='' } = this.registerForm.value;
-    this.authService.register(email!, password!, fullName!).subscribe( (isAuthenticated) => {
-      if (isAuthenticated) {
+    console.log(email, password, fullName);
+    this.authService.register(email!, password!, fullName!).subscribe( (isRegistered) => {
+      if (isRegistered) {
         this.router.navigateByUrl('/');
         return;
       }
@@ -42,6 +43,7 @@ export class RegisterPageComponent {
         this.hasError.set(false);
       }, 2000);
     });
+    
   }
 
 }

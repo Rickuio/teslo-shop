@@ -2,6 +2,7 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { AuthResponse } from '@auth/interfaces/auth-response.interface';
 import { User } from '@auth/interfaces/user.interface';
 import { catchError, map, Observable, of, tap } from 'rxjs';
@@ -18,6 +19,7 @@ export class AuthService {
     private _authStatus = signal<AuthStatus>('checking');
 
     private http = inject(HttpClient);
+    private router = inject(Router);
 
     checkStatusResource = rxResource({
         loader: () => this.checkStatus()
@@ -36,7 +38,7 @@ export class AuthService {
     isAdmin = computed( () => this._user()?.roles.includes('admin') ?? false);
 
     login (mail: string, pass: string): Observable<boolean> {
-        return this.http.post<AuthResponse>(`${baseUrl}/auth/login`,{
+        return this.http.post<AuthResponse>(`${baseUrl}/auth/login`, {
             email: mail,
             password: pass
         }).pipe(
@@ -46,9 +48,9 @@ export class AuthService {
     }
 
     register (mail: string, pass: string, name: string): Observable<boolean> {
-        return this.http.post<AuthResponse>(`${baseUrl}/auth/register`,{
+        return this.http.post<AuthResponse>(`${baseUrl}/auth/register`, {
             email: mail,
-            pasword: pass,
+            password: pass,
             fullName: name,
         }).pipe(
             map((resp) => this.handleAuthSuccessObs(resp)),
@@ -89,6 +91,11 @@ export class AuthService {
         this._token.set(null);
         this._authStatus.set('not-auth');
         localStorage.removeItem('token');
+    }
+
+    logoutAdmin() {
+        this.logout();
+        this.router.navigateByUrl('/');
     }
 
     private handleAuthSuccessObs(resp: AuthResponse) {
