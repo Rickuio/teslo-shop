@@ -1,4 +1,4 @@
-import { Component, inject, input, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal } from '@angular/core';
 import { Product } from '@products/interfaces/product.interface';
 import { ProductCarouselComponent } from "@products/components/product-carousel/product-carousel.component";
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -22,6 +22,13 @@ export class ProductDetailsComponent implements OnInit{
   router = inject(Router);
   isUpdate = signal(false);
 
+  imageFileList: FileList | undefined = undefined;
+  tempImages = signal<string[]>([]);
+
+  imagesToCarousel = computed( () => {
+    const totalImages = [ ...this.product().images, ...this.tempImages()];
+    return totalImages;
+  });
 
   productForm = this.fb.group({
     title: ['', Validators.required],
@@ -58,9 +65,11 @@ export class ProductDetailsComponent implements OnInit{
   }
 
   async onSubmit() {
+    
     const isValid = this.productForm.valid;
     //console.log(this.productForm.value, {isValid});
     this.productForm.markAllAsTouched();
+    
     if (!isValid) return;
     const formValue = this.productForm.value;
 
@@ -78,8 +87,10 @@ export class ProductDetailsComponent implements OnInit{
           this.router.navigate(['/admin/products', product.id]);
           }
           );
-          */
-      const product = await firstValueFrom(this.productService.createProduct(productLike));
+      */
+      const product = await firstValueFrom(
+        this.productService.createProduct(productLike, this.imageFileList)
+      );
       this.router.navigate(['/admin/products', product.id]);
           
     }else {
@@ -88,7 +99,9 @@ export class ProductDetailsComponent implements OnInit{
         next: (data) => console.log('Producto actualizado!')
       });
       */
-      await firstValueFrom(this.productService.updateProduct(this.product().id, productLike));
+      await firstValueFrom(
+        this.productService.updateProduct(this.product().id, productLike, this.imageFileList)
+      );
     }
 
     this.isUpdate.set(true);
@@ -96,6 +109,18 @@ export class ProductDetailsComponent implements OnInit{
       this.isUpdate.set(false);
     }, 2000);
 
+  }
+
+  // Images
+  onFileChanged( event: Event) {
+    const fileList = ( event.target as HTMLInputElement).files;
+    this.imageFileList = fileList ?? undefined;
+    this.tempImages.set([]);
+    const imgUrls = Array.from(fileList ?? []).map( 
+      (file) => URL.createObjectURL(file)
+    );
+    console.log({Urls: imgUrls});
+    this.tempImages.set(imgUrls);
   }
 
 }
