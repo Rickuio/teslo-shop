@@ -1,3 +1,3 @@
 export const environment = {
-    baseUrl: 'http://localhost:4000/api'
+    baseUrl: 'https://teslo-shop-nest-backend.onrender.com/api'
 };
